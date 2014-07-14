@@ -51,8 +51,11 @@ syn region  jediDocType start="^\s*\(!html5\)" end="$"
 syn keyword jediHtmlArg contained href title
 
 " comment, suppression, text
-syn region  jediText start=+\s*'+ end=+$+ contained
-syn region  jediText start=+\s*"+ end=+$+ contained contains=jediInterpolation
+syn match  jediText "'" contained nextgroup=jediPlainText
+syn match  jediText '"' contained nextgroup=jediInterpolatedText
+syn region jediPlainText contained start="\s*" end="$"
+syn region jediInterpolatedText contained start="\s*" end="$" contains=jediInterpolation
+syn keyword jediQuoteKeyword ' "
 syn match   jediComment '^\%(\s*\)!\%(html5\)\@!.*$'
 syn region  jediSuppression start="^\%(\s*\|\t*\)--"  end="$"
 
@@ -89,7 +92,7 @@ syn match  jediError "\$" contained
 hi def link jediScriptConditional      PreProc
 hi def link jediScriptStatement        PreProc
 hi def link jediHtmlArg                htmlArg
-hi def link jediText                   String
+" hi def link jediText                   String
 hi def link jediAttributeString        String
 hi def link jediAttributesDelimiter    Identifier
 hi def link jediIdChar                 Special
@@ -105,6 +108,7 @@ hi def link jediComment                Comment
 hi def link jediSuppression            jediComment
 hi def link jediColon                  PreProc
 hi def link jediPostKeyword            Keyword
+hi def link jediText                   Keyword
 
 let b:current_syntax = "jedi"
 
