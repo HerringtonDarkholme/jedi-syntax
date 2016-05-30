@@ -31,7 +31,7 @@ syn match   jediBegin "^\s*\%([<>]\|&[^=~ ]\)\@!" nextgroup=jediTag,jediText,jed
 syn match   jediBlock "^\s*#\%(\w\|-\)\+"
 
 syn match   jediTag "+\?\w\+\%(:\w\+\)\=" contained contains=htmlTagName,htmlSpecialTagName nextgroup=jediPostfix,@jediComponent
-syn cluster jediComponent contains=jediAttributes,jediIdChar,jediBlockExpansionChar,jediClassChar,jediText,jediJavascript
+syn cluster jediComponent contains=jediAttributes,jediIdChar,jediBlockExpansionChar,jediClassChar,jediText,jediJavascript,jediAssignment
 " syn region  jediAttributes matchgroup=jediAttributesDelimiter start="(" end=")" contained contains=@htmlJavascript,jediHtmlArg,htmlArg,htmlEvent,htmlCssDefinition nextgroup=@jediComponent
 
 " @attr = \"{...}\" | @attr = '...'
@@ -44,7 +44,7 @@ syn region  jediAttributeString contained start=+"+ end=+"\s*+ skip=+\\"+ contai
 syn match   jediClassChar "\." contained nextgroup=jediClass
 syn match   jediBlockExpansionChar "\s*>\s*" contained nextgroup=jediTag
 syn match   jediIdChar "#{\@!" contained nextgroup=jediId
-syn match   jediClass "\%(\w\|-\)\+" contained nextgroup=@jediComponent,jediPostfix
+syn match   jediClass "\%(\w\|-\)\+" contained nextgroup=@jediComponent,jediPostfix skipwhite
 
 " Id must be the last only one
 syn match   jediId "\%(\w\|-\)\+" contained nextgroup=jediAttributes,jediBlockExpansionChar,jediText,jediPostfix
@@ -55,8 +55,8 @@ syn region  jediDocType start="^\s*\(!html5\)" end="$"
 syn keyword jediHtmlArg contained href title
 
 " comment, suppression, text
-syn region jediText matchgroup=jediTextQuote start="'" end="'\|$" skip="\\'"
-syn region jediText matchgroup=jediTextQuote start='"' end='"\|$' contains=jediInterpolation skip='\\"'
+syn region jediText matchgroup=jediTextQuote start="'" end="'\|$" skip="\\'" contained
+syn region jediText matchgroup=jediTextQuote start='"' end='"\|$' contains=jediInterpolation skip='\\"' contained
 "
 syn match   jediComment '^\%(\s*\)!\%(html5\)\@!.*$'
 syn match   jediComment '^\%(\s*\)//.*$'
@@ -67,18 +67,23 @@ syn match   jediInterpolationEscape "\\\@<!\%(\\\\\)*\\\%(\\\ze#{\|#\ze{\)"
 
 " colon keyword
 " syn region jediColon start=":" end="\s*" contains=jediKeyword nextgroup=jediAnyExpr
-syn region  jediDirective matchgroup=jediColon start=":" end="$" contains=jediKeyword,@jediAnyExpr
-syn keyword jediKeyword contained skipwhite nextgroup=@jediAnyExpr if else for in let import unsafe external
+syn region  jediDirective matchgroup=jediColon start="^\s*:" end="$" contains=jediKeyword,@jediAnyExpr
 syn keyword jediExprKeyword contained containedin=jediPostfix if for let else in then
+syn keyword jediKeyword contained skipwhite nextgroup=@jediAnyExpr if else for in let import unsafe external
 
 syn match   jediOperators   /[-+&<>]/ contained
 syn keyword jediOperators   contained div mul
 syn region  jediPostfix	    contained start="\v\s+(if|else|let|for)\@=" end="$" nextgroup=@jediAnyExpr
-syn region  jediParenthesis matchgroup=jediDelimiter start="(" end=")" contained keepend contains=@jediAnyExpr
+syn region  jediParenthesis start="(" end=")" contained keepend contains=@jediAnyExpr
 syn region  jediBrackets    matchgroup=Function start="\[" end="\]" contained keepend contains=@jediAnyExpr
-syn match   jediIdentifier  /\<[^=<>!?+\-*\/%|&,;:. ~@#`"'\[\]\(\)\{\}\^0-9][^=<>!?+\-*\/%|&,;:. ~@#`"'\[\]\(\)\{\}\^]*/ nextgroup=jediAssignment skipwhite
-syn match   jediAssignment  /=/ nextgroup=@jediAnyExpr
-syn cluster jediAnyExpr     contains=jediExprKeyword,jediOperators,jediParenthesis,jediBrackets,jediAttributeString,jediIdentifier
+syn match   jediIdentifier  /\<[^=<>!?+\-*\/%|&,;:. ~@#`"'\[\]\(\)\{\}\^0-9][^=<>!?+\-*\/%|&,;:. ~@#`"'\[\]\(\)\{\}\^]*/ nextgroup=jediAssignment skipwhite contained
+syn match   jediAssignment  /=/ nextgroup=@jediAnyExpr skipwhite contained
+syn match   jediArgument    /*/ nextgroup=@jediAnyExpr skipwhite contained
+syn match   jediNumber      /\<0[bB][01]\+\>/        nextgroup=@jediAnyExpr skipwhite skipempty
+syn match   jediNumber      /\<0[oO][0-7]\+\>/       nextgroup=@jediAnyExpr skipwhite skipempty
+syn match   jediNumber      /\<0[xX][0-9a-fA-F]\+\>/ nextgroup=@jediAnyExpr skipwhite skipempty
+syn match   jediNumber      /[+-]\=\%(\d\+\.\d\+\|\d\+\|\.\d\+\)\%([eE][+-]\=\d\+\)\=\>/
+syn cluster jediAnyExpr     contains=jediExprKeyword,jediOperators,jediParenthesis,jediBrackets,jediAttributeString,jediNumber,jediIdentifier,jediArgument
 
 " mixin
 syn match  jediMixin "::" nextgroup=jediTag
@@ -93,7 +98,7 @@ syn region  jediPlainFilter matchgroup=jediFilter start="^\z(\s*\):\%(sass\|less
 syn region  javascriptParenthesisBlock start="(" end=")" contains=@htmlJavascript contained keepend
 syn cluster htmlJavascript add=javascriptParenthesisBlock
 
-syn region  jediJavascript matchgroup=jediJavascriptOutputChar start="[!&]\==\|\~" skip=",\s*$" end="$" contained contains=@htmlJavascript keepend
+syn region  jediExprStart  start="^\%(\s*\)=" end="$" contained contains=@jediAnyExpr keepend
 
 syn region  jediJavascript start="^\z(\s*\)script\%(:\w\+\)\=" end="^\%(\z1\s\|\s*$\)\@!" contains=@htmlJavascript,jediJavascriptTag keepend
 syn region  jediJavascriptTag contained start="^\z(\s*\)script\%(:\w\+\)\=" end="$" contains=jediBegin,jediTag
@@ -121,7 +126,9 @@ hi def link jediComment                Comment
 hi def link jediSuppression            jediComment
 hi def link jediColon                  PreProc
 hi def link jediKeyword                PreProc
-hi def link jediExprKeyword			   Keyword
+hi def link jediExprKeyword			   PreProc
+hi def link jediNumber	     		   Number
+hi def link jediArgument 			   Type
 hi def link jediTextQuote              Keyword
 hi def link jediMixin                  Keyword
 hi def link jediOperators              Operator
