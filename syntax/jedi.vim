@@ -19,13 +19,16 @@ unlet! b:current_syntax
 unlet! b:current_syntax
 " silent! syntax include @htmlMarkdown syntax/markdown.vim
 unlet! b:current_syntax
-silent! syntax include @jediPHP syntax/php.vim
+runtime! syntax/php.vim
 
 syn case match
 
-syn cluster jediTop contains=jediBegin,jediComment,jediSuppression,jediJavascript
+syn cluster jediTop contains=jediBegin,jediComment,jediSuppression,jediJavascript,jediBlock,jediMixin
 
-syn match   jediBegin "^\s*\%([<>]\|&[^=~ ]\)\@!" nextgroup=jediTag,jediText,jediJavascript,jediScriptConditional,jediScriptStatement,jediAttributes,jediColon
+syn match   jediBegin "^\s*\%([<>]\|&[^=~ ]\)\@!" nextgroup=jediTag,jediText,jediJavascript,jediScriptConditional,jediScriptStatement,jediAttributes,jediColon,jediMixin
+
+" #jedi-block
+syn match   jediBlock "^\s*#\%(\w\|-\)\+"
 
 syn match   jediTag "+\?\w\+\%(:\w\+\)\=" contained contains=htmlTagName,htmlSpecialTagName nextgroup=jediPostfix,@jediComponent
 syn cluster jediComponent contains=jediAttributes,jediIdChar,jediBlockExpansionChar,jediClassChar,jediText,jediJavascript
@@ -42,6 +45,7 @@ syn match   jediClassChar "\." contained nextgroup=jediClass
 syn match   jediBlockExpansionChar "\s*>\s*" contained nextgroup=jediTag
 syn match   jediIdChar "#{\@!" contained nextgroup=jediId
 syn match   jediClass "\%(\w\|-\)\+" contained nextgroup=@jediComponent,jediPostfix
+
 " Id must be the last only one
 syn match   jediId "\%(\w\|-\)\+" contained nextgroup=jediAttributes,jediBlockExpansionChar,jediText,jediPostfix
 syn region  jediDocType start="^\s*\(!html5\)" end="$"
@@ -51,37 +55,40 @@ syn region  jediDocType start="^\s*\(!html5\)" end="$"
 syn keyword jediHtmlArg contained href title
 
 " comment, suppression, text
-syn match  jediText "'" contained nextgroup=jediPlainText
-syn match  jediText '"' contained nextgroup=jediInterpolatedText
-syn region jediPlainText contained start="\s*" end="$"
-syn region jediInterpolatedText contained start="\s*" end="$" contains=jediInterpolation
-syn keyword jediQuoteKeyword ' "
+syn region jediText matchgroup=jediTextQuote start="'" end="'\|$" skip="\\'"
+syn region jediText matchgroup=jediTextQuote start='"' end='"\|$' contains=jediInterpolation skip='\\"'
+"
 syn match   jediComment '^\%(\s*\)!\%(html5\)\@!.*$'
+syn match   jediComment '^\%(\s*\)//.*$'
 syn region  jediSuppression start="^\%(\s*\|\t*\)--"  end="$"
 
-syn region  jediInterpolation matchgroup=jediInterpolationDelimiter start="{" end="}" contains=@htmlJavascript
+syn region  jediInterpolation matchgroup=jediInterpolationDelimiter start="{" end="}" contains=@htmlJavascript contained
 syn match   jediInterpolationEscape "\\\@<!\%(\\\\\)*\\\%(\\\ze#{\|#\ze{\)"
 
 " colon keyword
 " syn region jediColon start=":" end="\s*" contains=jediKeyword nextgroup=jediAnyExpr
-syn region jediColon start=":" end="\v\s+|$" nextgroup=jediAnyExpr
-syn keyword jediKeyword contained if else for in let import unsafe external
-syn keyword jediPostKeyword contained containedin=jediPostfix if for let else in
-syn region jediPostfix contained start="\v\s+(if|else|let|for)\@=" end="$" contains=jediPostKeyword
-syn match jediAnyExpr contained ".*$" contains=jediPostKeyword
+syn region  jediColon start=":" end="$" contains=jediKeyword
+syn keyword jediKeyword contained nextgroup=jediAnyExpr if else for in let import unsafe external
+syn keyword jediPostKeyword contained containedin=jediPostfix if for let else in then
+" syn match   jediOperators "\[+-&\]" contained
+syn keyword jediOperators contained div mul
+syn region  jediPostfix contained start="\v\s+(if|else|let|for)\@=" end="$" contains=jediPostKeyword
+syn cluster jediAnyExpr contains=jediPostKeyword,jediOperators
+
+" mixin
+syn match  jediMixin "::" nextgroup=jediTag
 
 syn region  jediJavascriptFilter matchgroup=jediFilter start="^\z(\s*\):javascript\s*$" end="^\%(\z1\s\|\s*$\)\@!" contains=@htmlJavascript
 syn region  jediCoffeescriptFilter matchgroup=jediFilter start="^\z(\s*\):coffeescript\s*$" end="^\%(\z1\s\|\s*$\)\@!" contains=@htmlCoffeescript
 syn region  jediMarkdownFilter matchgroup=jediFilter start=/^\z(\s*\):markdown\s*$/ end=/^\%(\z1\s\|\s*$\)\@!/ contains=@htmlMarkdown
 syn region  jediStylusFilter matchgroup=jediFilter start="^\z(\s*\):stylus\s*$" end="^\%(\z1\s\|\s*$\)\@!" contains=@htmlStylus
-syn region jediPHPFilter matchgroup=jediFilter start="\%(\s*\|\t*\)--\@!" end="$" contains=@jediPHP
+syn region  jediPHPFilter matchgroup=jediFilter start="\%(\s*\)--\@!" end="$" contains=@phpClTop
 syn region  jediPlainFilter matchgroup=jediFilter start="^\z(\s*\):\%(sass\|less\|cdata\)\s*$" end="^\%(\z1\s\|\s*$\)\@!"
 
 syn region  javascriptParenthesisBlock start="(" end=")" contains=@htmlJavascript contained keepend
 syn cluster htmlJavascript add=javascriptParenthesisBlock
 
 syn region  jediJavascript matchgroup=jediJavascriptOutputChar start="[!&]\==\|\~" skip=",\s*$" end="$" contained contains=@htmlJavascript keepend
-syn region  jediJavascript matchgroup=jediJavascriptChar start="-" skip=",\s*$" end="$" contained contains=@htmlJavascript keepend
 
 syn region  jediJavascript start="^\z(\s*\)script\%(:\w\+\)\=" end="^\%(\z1\s\|\s*$\)\@!" contains=@htmlJavascript,jediJavascriptTag keepend
 syn region  jediJavascriptTag contained start="^\z(\s*\)script\%(:\w\+\)\=" end="$" contains=jediBegin,jediTag
@@ -92,6 +99,7 @@ syn match  jediError "\$" contained
 hi def link jediScriptConditional      PreProc
 hi def link jediScriptStatement        PreProc
 hi def link jediHtmlArg                htmlArg
+hi def link jediBlock                  Identifier
 " hi def link jediText                   String
 hi def link jediAttributeString        String
 hi def link jediAttributesDelimiter    Identifier
@@ -108,7 +116,9 @@ hi def link jediComment                Comment
 hi def link jediSuppression            jediComment
 hi def link jediColon                  PreProc
 hi def link jediPostKeyword            Keyword
-hi def link jediText                   Keyword
+hi def link jediTextQuote              Keyword
+hi def link jediMixin                  Keyword
+hi def link jediOperators              Operator
 
 let b:current_syntax = "jedi"
 
