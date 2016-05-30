@@ -25,7 +25,7 @@ syn case match
 
 syn cluster jediTop contains=jediBegin,jediComment,jediSuppression,jediJavascript,jediBlock,jediMixin
 
-syn match   jediBegin "^\s*\%([<>]\|&[^=~ ]\)\@!" nextgroup=jediTag,jediText,jediJavascript,jediScriptConditional,jediScriptStatement,jediAttributes,jediDirective,jediMixin
+syn match   jediBegin "^\s*\%([<>]\|&[^=~ ]\)\@!" nextgroup=jediTag,jediText,jediJavascript,jediScriptConditional,jediScriptStatement,jediAttributes,jediDirective,jediMixin,jediExprOutput
 
 " #jedi-block
 syn match   jediBlock "^\s*#\%(\w\|-\)\+"
@@ -72,7 +72,7 @@ syn keyword jediExprKeyword contained containedin=jediPostfix if for let else in
 syn keyword jediKeyword contained skipwhite nextgroup=@jediAnyExpr if else for in let import unsafe external
 
 syn match   jediOperators   /[-+&<>]/ contained
-syn keyword jediOperators   contained div mul
+syn keyword jediOperators   contained div mul mod
 syn region  jediPostfix	    contained start="\v\s+(if|else|let|for)\@=" end="$" nextgroup=@jediAnyExpr
 syn region  jediParenthesis start="(" end=")" contained keepend contains=@jediAnyExpr
 syn region  jediBrackets    matchgroup=Function start="\[" end="\]" contained keepend contains=@jediAnyExpr
@@ -98,7 +98,7 @@ syn region  jediPlainFilter matchgroup=jediFilter start="^\z(\s*\):\%(sass\|less
 syn region  javascriptParenthesisBlock start="(" end=")" contains=@htmlJavascript contained keepend
 syn cluster htmlJavascript add=javascriptParenthesisBlock
 
-syn region  jediExprStart  start="^\%(\s*\)=" end="$" contained contains=@jediAnyExpr keepend
+syn region  jediExprOutput  start="=" end="$" contained contains=@jediAnyExpr keepend
 
 syn region  jediJavascript start="^\z(\s*\)script\%(:\w\+\)\=" end="^\%(\z1\s\|\s*$\)\@!" contains=@htmlJavascript,jediJavascriptTag keepend
 syn region  jediJavascriptTag contained start="^\z(\s*\)script\%(:\w\+\)\=" end="$" contains=jediBegin,jediTag
