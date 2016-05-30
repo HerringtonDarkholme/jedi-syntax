@@ -30,7 +30,7 @@ syn match   jediBegin "^\s*\%([<>]\|&[^=~ ]\)\@!" nextgroup=jediTag,jediText,jed
 " #jedi-block
 syn match   jediBlock "^\s*#\%(\w\|-\)\+"
 
-syn match   jediTag "+\?\w\+\%(:\w\+\)\=" contained contains=htmlTagName,htmlSpecialTagName nextgroup=jediPostfix,@jediComponent
+syn match   jediTag "+\?\w\+\%(:\w\+\)\=" contained contains=htmlTagName,htmlSpecialTagName nextgroup=jediPostfix,@jediComponent skipwhite
 syn cluster jediComponent contains=jediAttributes,jediIdChar,jediBlockExpansionChar,jediClassChar,jediText,jediJavascript,jediAssignment
 " syn region  jediAttributes matchgroup=jediAttributesDelimiter start="(" end=")" contained contains=@htmlJavascript,jediHtmlArg,htmlArg,htmlEvent,htmlCssDefinition nextgroup=@jediComponent
 
