@@ -36,9 +36,11 @@ syn cluster jediComponent contains=jediAttributes,jediIdChar,jediBlockExpansionC
 
 " @attr = \"{...}\" | @attr = '...'
 syn match   jediAttributes "\s*@\%(\w\|-\)\+\s*" contained contains=@htmlJavascript,jediHtmlArg,htmlArg,htmlEvent,htmlCssDefinition nextgroup=jediAttrAssign
+syn match   jediAttributes "\s*@@" contained nextgroup=jediAttrName skipwhite
+syn match   jediAttrName   "\s*\%(\w\|-\)\+" contained contains=@htmlJavascript,jediHtmlArg,htmlArg,htmlEvent,htmlCssDefinition nextgroup=jediAttrAssign
 syn match   jediAttrAssign "\s*=\s*" contained nextgroup=jediAttributeString
-syn region  jediAttributeString contained start=+'+ end=+'\s*+ skip=+\\'+ nextgroup=@jediComponent,jediPostfix
-syn region  jediAttributeString contained start=+"+ end=+"\s*+ skip=+\\"+ contains=jediInterpolation nextgroup=@jediComponent,jediPostfix
+syn region  jediAttributeString contained start=+'+ end=+'\s*+ skip=+\\'+ nextgroup=@jediComponent,jediPostfix,jediAttrName
+syn region  jediAttributeString contained start=+"+ end=+"\s*+ skip=+\\"+ contains=jediInterpolation nextgroup=@jediComponent,jediPostfix,jediAttrName
 
 " class, id syntactical sugar
 syn match   jediClassChar "\." contained nextgroup=jediClass
