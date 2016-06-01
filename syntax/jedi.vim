@@ -94,7 +94,7 @@ syn region  jediJavascriptFilter matchgroup=jediFilter start="^\z(\s*\):javascri
 syn region  jediCoffeescriptFilter matchgroup=jediFilter start="^\z(\s*\):coffeescript\s*$" end="^\%(\z1\s\|\s*$\)\@!" contains=@htmlCoffeescript
 syn region  jediMarkdownFilter matchgroup=jediFilter start=/^\z(\s*\):markdown\s*$/ end=/^\%(\z1\s\|\s*$\)\@!/ contains=@htmlMarkdown
 syn region  jediStylusFilter matchgroup=jediFilter start="^\z(\s*\):stylus\s*$" end="^\%(\z1\s\|\s*$\)\@!" contains=@htmlStylus
-syn region  jediPHPFilter matchgroup=jediFilter start="\%(\s*\)--\@!" end="$" contains=@phpClTop
+syn region  jediPHPFilter matchgroup=jediFilter start="^\%(\s*\)--\@!" end="$" contains=@phpClTop
 syn region  jediPlainFilter matchgroup=jediFilter start="^\z(\s*\):\%(sass\|less\|cdata\)\s*$" end="^\%(\z1\s\|\s*$\)\@!"
 
 syn region  javascriptParenthesisBlock start="(" end=")" contains=@htmlJavascript contained keepend
