@@ -60,9 +60,9 @@ syn keyword jediHtmlArg contained href title
 syn region jediText matchgroup=jediTextQuote start="'" end="'\|$" skip="\\'" contained
 syn region jediText matchgroup=jediTextQuote start='"' end='"\|$' contains=jediInterpolation skip='\\"' contained
 "
-syn match   jediComment '^\%(\s*\)!\%(html5\)\@!.*$'
+syn region   jediComment start='^\z(\s*\)!\%(html5\)\@!.*$' end='^\%(\z1\s\|\s*$\)\@!'
 syn match   jediComment '^\%(\s*\)//.*$'
-syn region  jediSuppression start="^\%(\s*\|\t*\)--"  end="$"
+syn region  jediSuppression start="^\z(\s*\)--"  end="^\%(\z1\s\|\s*$\)\@!"
 
 syn region  jediInterpolation matchgroup=jediDelimiter start="{" end="}" contains=@htmlJavascript contained
 syn match   jediInterpolationEscape "\\\@<!\%(\\\\\)*\\\%(\\\ze#{\|#\ze{\)"
